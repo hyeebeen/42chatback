@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { settingsStorage } from '@/lib/temp-settings-storage'
+import { settingsStorage } from '@/lib/adaptive-settings-storage'
 
 export async function POST(request: NextRequest) {
   try {
