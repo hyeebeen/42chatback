@@ -1,26 +1,276 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.625rem;
+  --background: 245 247 250; /* #F5F7FA */
+  --foreground: 27 31 42; /* #1B1F2A */
+  --card: 255 255 255; /* #FFFFFF */
+  --card-foreground: 27 31 42; /* #1B1F2A */
+  --popover: 255 255 255; /* #FFFFFF */
+  --popover-foreground: 27 31 42; /* #1B1F2A */
+  --primary: 58 107 242; /* #3A6BF2 */
+  --primary-foreground: 255 255 255; /* #FFFFFF */
+  --secondary: 241 245 249; /* #F1F5F9 */
+  --secondary-foreground: 27 31 42; /* #1B1F2A */
+  --muted: 241 245 249; /* #F1F5F9 */
+  --muted-foreground: 100 116 139; /* #64748B */
+  --accent: 34 199 169; /* #22C7A9 */
+  --accent-foreground: 255 255 255; /* #FFFFFF */
+  --destructive: 239 68 68; /* #EF4444 */
+  --border: 226 232 240; /* #E2E8F0 */
+  --input: 226 232 240; /* #E2E8F0 */
+  --ring: 58 107 242; /* #3A6BF2 */
+  --chart-1: 58 107 242; /* #3A6BF2 */
+  --chart-2: 34 199 169; /* #22C7A9 */
+  --chart-3: 16 185 129; /* #10B981 */
+  --chart-4: 251 191 36; /* #FBBF24 */
+  --chart-5: 245 101 101; /* #F56565 */
+  --sidebar: 248 250 252; /* #F8FAFC */
+  --sidebar-foreground: 27 31 42; /* #1B1F2A */
+  --sidebar-primary: 58 107 242; /* #3A6BF2 */
+  --sidebar-primary-foreground: 255 255 255; /* #FFFFFF */
+  --sidebar-accent: 241 245 249; /* #F1F5F9 */
+  --sidebar-accent-foreground: 27 31 42; /* #1B1F2A */
+  --sidebar-border: 226 232 240; /* #E2E8F0 */
+  --sidebar-ring: 58 107 242; /* #3A6BF2 */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --background: 17 21 40; /* #111528 */
+  --foreground: 231 236 255; /* #E7ECFF */
+  --card: 23 28 51; /* #171C33 */
+  --card-foreground: 231 236 255; /* #E7ECFF */
+  --popover: 23 28 51; /* #171C33 */
+  --popover-foreground: 231 236 255; /* #E7ECFF */
+  --primary: 92 124 255; /* #5C7CFF */
+  --primary-foreground: 255 255 255; /* #FFFFFF */
+  --secondary: 30 41 59; /* #1E293B */
+  --secondary-foreground: 231 236 255; /* #E7ECFF */
+  --muted: 30 41 59; /* #1E293B */
+  --muted-foreground: 136 144 166; /* #8890A6 */
+  --accent: 34 199 169; /* #22C7A9 */
+  --accent-foreground: 255 255 255; /* #FFFFFF */
+  --destructive: 248 113 113; /* #F87171 */
+  --border: 30 41 59; /* #1E293B */
+  --input: 30 41 59; /* #1E293B */
+  --ring: 92 124 255; /* #5C7CFF */
+  --chart-1: 92 124 255; /* #5C7CFF */
+  --chart-2: 34 199 169; /* #22C7A9 */
+  --chart-3: 16 185 129; /* #10B981 */
+  --chart-4: 251 191 36; /* #FBBF24 */
+  --chart-5: 245 101 101; /* #F56565 */
+  --sidebar: 15 23 42; /* #0F172A */
+  --sidebar-foreground: 231 236 255; /* #E7ECFF */
+  --sidebar-primary: 92 124 255; /* #5C7CFF */
+  --sidebar-primary-foreground: 255 255 255; /* #FFFFFF */
+  --sidebar-accent: 30 41 59; /* #1E293B */
+  --sidebar-accent-foreground: 231 236 255; /* #E7ECFF */
+  --sidebar-border: 30 41 59; /* #1E293B */
+  --sidebar-ring: 92 124 255; /* #5C7CFF */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 品牌风格指引要求的登录页面暗色模式渐变 */
+.dark .login-hero {
+  background: linear-gradient(168deg, rgba(92,124,255,0.12), rgba(34,199,169,0.08), transparent);
+}
+
+/* 品牌风格指引要求的优雅过渡动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 聊天气泡的"活水"流动效果 */
+.chat-bubble {
+  position: relative;
+}
+
+.chat-bubble::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, rgba(58,107,242,0.1), transparent);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: subtract;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.chat-bubble:hover::before {
+  opacity: 1;
+}
+
+/* 改进滚动条样式 */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 3px;
+  opacity: 0.3;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  opacity: 0.5;
+}
+
+/* 输入框自适应高度动画 */
+.input-area {
+  transition: all 200ms ease-out;
+}
+
+/* CTA按钮在暗色模式下的内阴影效果 */
+.dark button[data-variant="default"] {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+/* 活水智聊品牌特效 - 流动水效果 */
+@keyframes flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.flowing-water {
+  background: linear-gradient(-45deg,
+    rgba(58, 107, 242, 0.05),
+    rgba(34, 199, 169, 0.03),
+    rgba(92, 124, 255, 0.04),
+    rgba(22, 192, 169, 0.02)
+  );
+  background-size: 400% 400%;
+  animation: flow 8s ease-in-out infinite;
+}
+
+/* 品牌主色渐变效果 */
+.brand-gradient {
+  background: linear-gradient(135deg, #3A6BF2 0%, #22C7A9 100%);
+}
+
+.brand-gradient-hover {
+  background: linear-gradient(135deg, #2952E8 0%, #1FB89E 100%);
+}
+
+/* 交互式阴影效果 */
+.interactive-shadow {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.interactive-shadow:hover {
+  box-shadow:
+    0 10px 25px rgba(58, 107, 242, 0.15),
+    0 4px 10px rgba(34, 199, 169, 0.1);
+  transform: translateY(-1px);
+}
+
+/* 现代化微妙动画 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-effect {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(58, 107, 242, 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* 聊天界面背景 */
+.chat-background {
+  background:
+    radial-gradient(circle at 20% 80%, rgba(58, 107, 242, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(34, 199, 169, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(92, 124, 255, 0.02) 0%, transparent 50%);
+}
+
+/* 增强版滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #3A6BF2, #22C7A9);
+  border-radius: 3px;
+  opacity: 0.6;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.8;
+}
+
+/* 活水流动边框效果 */
+.flowing-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.flowing-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(58, 107, 242, 0.3),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.flowing-border:hover::before {
+  left: 100%;
 }
