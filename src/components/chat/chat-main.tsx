@@ -152,7 +152,7 @@ export function ChatMain({ conversationId, onNewConversation }: ChatMainProps) {
     const model = availableModels.find(m => m.id === modelId)
     if (model) {
       setModelProvider(model.provider)
-      console.log('当前模型:', model.name, '提供商:', model.displayName)
+      console.log('当前模型:', model.name, '提供商:', model.provider)
     }
   }
 
@@ -197,7 +197,7 @@ export function ChatMain({ conversationId, onNewConversation }: ChatMainProps) {
                         {availableModels.find(m => m.id === selectedModel)?.name || selectedModel}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        ({availableModels.find(m => m.id === selectedModel)?.displayName})
+                        ({availableModels.find(m => m.id === selectedModel)?.provider})
                       </span>
                     </div>
                   )}
@@ -218,14 +218,14 @@ export function ChatMain({ conversationId, onNewConversation }: ChatMainProps) {
                     return Object.entries(groupedModels).map(([provider, models]) => (
                       <div key={provider}>
                         <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground bg-muted/50">
-                          {models[0]?.displayName || provider}
+                          {provider}
                         </div>
                         {models.map((model) => (
                           <SelectItem key={model.id} value={model.id} className="pl-4">
                             <div className="flex flex-col w-full">
                               <span className="font-medium">{model.name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {model.id !== model.name ? model.id : `${model.displayName} 模型`}
+                                {model.id !== model.name ? model.id : `${model.provider} 模型`}
                               </span>
                             </div>
                           </SelectItem>

@@ -279,10 +279,14 @@ export default function SettingsPage() {
         id: provider.id,
         name: provider.name,
         displayName: provider.displayName,
+        description: provider.description,
+        officialUrl: provider.officialUrl,
+        docsUrl: provider.docsUrl,
         apiKey: provider.apiKey,
         baseUrl: provider.baseUrl,
         availableModels: provider.availableModels,
-        enabled: true // 保存时自动启用
+        enabled: true, // 保存时自动启用
+        status: 'success' as const
       })
 
       const response = await fetch('/api/settings/save', {
