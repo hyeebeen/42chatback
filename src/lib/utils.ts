@@ -27,8 +27,7 @@ export function encryptApiKey(apiKey: string): string {
   const key = Buffer.from(process.env.ENCRYPTION_KEY.replace('base64:', ''), 'base64')
   const iv = crypto.randomBytes(16)
 
-  const cipher = crypto.createCipher(algorithm, key)
-  cipher.setAutoPadding(true)
+  const cipher = crypto.createCipherGCM(algorithm, key, iv)
 
   let encrypted = cipher.update(apiKey, 'utf8', 'hex')
   encrypted += cipher.final('hex')
@@ -51,9 +50,8 @@ export function decryptApiKey(encryptedApiKey: string): string {
   const iv = Buffer.from(ivHex, 'hex')
   const authTag = Buffer.from(authTagHex, 'hex')
 
-  const decipher = crypto.createDecipher(algorithm, key)
+  const decipher = crypto.createDecipherGCM(algorithm, key, iv)
   decipher.setAuthTag(authTag)
-  decipher.setAutoPadding(true)
 
   let decrypted = decipher.update(encrypted, 'hex', 'utf8')
   decrypted += decipher.final('utf8')
