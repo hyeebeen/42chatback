@@ -2,11 +2,11 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema'
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not set')
-}
+const connectionString = process.env.DB_URL || process.env.DATABASE_URL
 
-const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  throw new Error('DB_URL or DATABASE_URL is not set')
+}
 
 // 创建数据库连接
 const client = postgres(connectionString, {

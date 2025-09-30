@@ -29,7 +29,8 @@ interface UserSettings {
 // 检测是否可以使用数据库存储
 const canUseDatabaseStorage = () => {
   // 检查是否有数据库连接URL
-  return !!(process.env.DATABASE_URL && process.env.ENCRYPTION_KEY)
+  const dbUrl = process.env.DB_URL || process.env.DATABASE_URL
+  return !!(dbUrl && process.env.ENCRYPTION_KEY)
 }
 
 // 选择存储后端
