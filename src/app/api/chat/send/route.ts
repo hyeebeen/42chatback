@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const config = {
       baseUrl: provider.baseUrl,
-      apiKey: Buffer.from(provider.apiKey, 'base64').toString('utf-8') // 解密API Key
+      apiKey: provider.apiKey // API Key 已经在数据库存储层解密了
     }
 
     apiUrl = `${config.baseUrl}/v1/chat/completions`
