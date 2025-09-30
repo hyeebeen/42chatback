@@ -26,8 +26,15 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString()
     }
 
-    // 保存用户设置到临时存储
-    settingsStorage.saveUserSettings(session.user.email, settings)
+    // 保存用户设置到存储
+    const success = await settingsStorage.saveUserSettings(session.user.email, settings)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: '保存设置失败，请检查数据库连接' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,

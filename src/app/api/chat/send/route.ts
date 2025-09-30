@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 从用户保存的设置中获取API配置
-    const userSettings = settingsStorage.getUserSettings(session.user.email)
+    const userSettings = await settingsStorage.getUserSettings(session.user.email)
 
     if (!userSettings) {
       return NextResponse.json({ error: '请先配置AI模型设置' }, { status: 400 })

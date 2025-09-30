@@ -10,8 +10,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 从临时存储中加载用户设置
-    const userSettings = settingsStorage.getUserSettings(session.user.email)
+    // 从存储中加载用户设置
+    const userSettings = await settingsStorage.getUserSettings(session.user.email)
 
     return NextResponse.json({
       success: true,

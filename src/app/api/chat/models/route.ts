@@ -10,8 +10,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 从临时存储中获取用户已配置的模型
-    const availableModels = settingsStorage.getUserEnabledModels(session.user.email)
+    // 从存储中获取用户已配置的模型
+    const availableModels = await settingsStorage.getUserEnabledModels(session.user.email)
 
     return NextResponse.json({
       success: true,
