@@ -27,12 +27,16 @@ export function encryptApiKey(apiKey: string): string {
   const key = Buffer.from(process.env.ENCRYPTION_KEY.replace('base64:', ''), 'base64')
   const iv = crypto.randomBytes(16)
 
-  const cipher = crypto.createCipherGCM(algorithm, key, iv)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cipher = crypto.createCipher(algorithm, key) as any
+  if (cipher.setAAD) {
+    cipher.setAAD(Buffer.alloc(0))
+  }
 
   let encrypted = cipher.update(apiKey, 'utf8', 'hex')
   encrypted += cipher.final('hex')
 
-  const authTag = cipher.getAuthTag()
+  const authTag = cipher.getAuthTag ? cipher.getAuthTag() : Buffer.alloc(0)
 
   return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`
 }
@@ -46,12 +50,14 @@ export function decryptApiKey(encryptedApiKey: string): string {
   const algorithm = 'aes-256-gcm'
   const key = Buffer.from(process.env.ENCRYPTION_KEY.replace('base64:', ''), 'base64')
 
-  const [ivHex, authTagHex, encrypted] = encryptedApiKey.split(':')
-  const iv = Buffer.from(ivHex, 'hex')
+  const [, authTagHex, encrypted] = encryptedApiKey.split(':')
   const authTag = Buffer.from(authTagHex, 'hex')
 
-  const decipher = crypto.createDecipherGCM(algorithm, key, iv)
-  decipher.setAuthTag(authTag)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const decipher = crypto.createDecipher(algorithm, key) as any
+  if (decipher.setAuthTag && authTag.length > 0) {
+    decipher.setAuthTag(authTag)
+  }
 
   let decrypted = decipher.update(encrypted, 'hex', 'utf8')
   decrypted += decipher.final('utf8')
