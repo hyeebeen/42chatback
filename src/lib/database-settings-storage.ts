@@ -1,5 +1,5 @@
 // 数据库存储系统 - 真正的持久化存储
-import { db, apiConfigurations, promptTemplates } from '@/lib/db'
+import { db, apiConfigurations, promptTemplates, users } from '@/lib/db'
 import { encryptApiKey, decryptApiKey } from '@/lib/utils'
 import { eq } from 'drizzle-orm'
 import { ensureMigrations } from './migrate'
@@ -36,6 +36,31 @@ interface AIModel {
   description: string
 }
 
+// 获取或创建用户UUID
+async function getOrCreateUserUuid(email: string): Promise<string> {
+  try {
+    // 首先尝试查找现有用户
+    const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1)
+
+    if (existingUser.length > 0) {
+      return existingUser[0].id
+    }
+
+    // 如果用户不存在，创建一个新用户（仅用于存储，密码设为占位符）
+    const [newUser] = await db.insert(users).values({
+      name: email.split('@')[0], // 使用邮箱前缀作为名称
+      email: email,
+      hashedPassword: 'placeholder_for_oauth_user', // 占位符密码
+      role: 'user'
+    }).returning({ id: users.id })
+
+    return newUser.id
+  } catch (error) {
+    console.error('Error getting or creating user UUID:', error)
+    throw error
+  }
+}
+
 export const databaseSettingsStorage = {
   // 保存用户设置到数据库
   saveUserSettings: async (userId: string, settings: UserSettings): Promise<boolean> => {
@@ -45,13 +70,16 @@ export const databaseSettingsStorage = {
 
       console.log('保存设置到数据库:', userId)
 
+      // 获取或创建用户UUID
+      const userUuid = await getOrCreateUserUuid(userId)
+
       // 开始事务处理
       await db.transaction(async (tx) => {
         // 1. 删除用户现有的API配置
-        await tx.delete(apiConfigurations).where(eq(apiConfigurations.userId, userId))
+        await tx.delete(apiConfigurations).where(eq(apiConfigurations.userId, userUuid))
 
         // 2. 删除用户现有的prompt模板
-        await tx.delete(promptTemplates).where(eq(promptTemplates.userId, userId))
+        await tx.delete(promptTemplates).where(eq(promptTemplates.userId, userUuid))
 
         // 3. 保存新的API配置
         for (const provider of settings.providers) {
@@ -59,7 +87,7 @@ export const databaseSettingsStorage = {
             const encryptedApiKey = encryptApiKey(provider.apiKey)
 
             await tx.insert(apiConfigurations).values({
-              userId,
+              userId: userUuid,
               provider: provider.id,
               encryptedApiKey,
               baseUrl: provider.baseUrl,
@@ -71,7 +99,7 @@ export const databaseSettingsStorage = {
         // 4. 保存新的prompt模板
         for (const template of settings.promptTemplates) {
           await tx.insert(promptTemplates).values({
-            userId,
+            userId: userUuid,
             title: template.title,
             content: template.content,
           })
@@ -94,17 +122,20 @@ export const databaseSettingsStorage = {
 
       console.log('从数据库加载设置:', userId)
 
+      // 获取或创建用户UUID
+      const userUuid = await getOrCreateUserUuid(userId)
+
       // 获取用户的API配置
       const userApiConfigs = await db
         .select()
         .from(apiConfigurations)
-        .where(eq(apiConfigurations.userId, userId))
+        .where(eq(apiConfigurations.userId, userUuid))
 
       // 获取用户的prompt模板
       const userPromptTemplates = await db
         .select()
         .from(promptTemplates)
-        .where(eq(promptTemplates.userId, userId))
+        .where(eq(promptTemplates.userId, userUuid))
 
       // 构建提供商列表
       const providers = userApiConfigs.map(config => {

@@ -333,10 +333,14 @@ export default function SettingsPage() {
             id: p.id,
             name: p.name,
             displayName: p.displayName,
+            description: p.description,
+            officialUrl: p.officialUrl,
+            docsUrl: p.docsUrl,
             apiKey: p.apiKey,
             baseUrl: p.baseUrl,
             availableModels: p.availableModels,
-            enabled: p.enabled
+            enabled: p.enabled,
+            status: p.status
           })),
           promptTemplates
         }),
