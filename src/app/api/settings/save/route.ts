@@ -17,10 +17,8 @@ export async function POST(request: NextRequest) {
 
     const settings = {
       userId: session.user.email,
-      providers: providers.map((p: { id: string; name: string; displayName: string; apiKey: string; baseUrl: string; availableModels: string; enabled: boolean }) => ({
+      providers: providers.map((p: { id: string; name: string; displayName: string; description: string; officialUrl: string; docsUrl: string; apiKey: string; baseUrl: string; availableModels: string; enabled: boolean; status: string }) => ({
         ...p,
-        // 加密API Key（这里简化处理，实际应该使用加密算法）
-        apiKey: Buffer.from(p.apiKey).toString('base64')
       })),
       promptTemplates,
       updatedAt: new Date().toISOString()
