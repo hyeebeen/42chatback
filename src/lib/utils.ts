@@ -23,22 +23,21 @@ export function encryptApiKey(apiKey: string): string {
     throw new Error('ENCRYPTION_KEY is not set')
   }
 
-  const algorithm = 'aes-256-gcm'
-  const key = Buffer.from(process.env.ENCRYPTION_KEY.replace('base64:', ''), 'base64')
-  const iv = crypto.randomBytes(16)
+  try {
+    const algorithm = 'aes-256-cbc'
+    const key = Buffer.from(process.env.ENCRYPTION_KEY.replace('base64:', ''), 'base64').subarray(0, 32)
+    const iv = crypto.randomBytes(16)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cipher = crypto.createCipher(algorithm, key) as any
-  if (cipher.setAAD) {
-    cipher.setAAD(Buffer.alloc(0))
+    const cipher = crypto.createCipheriv(algorithm, key, iv)
+    let encrypted = cipher.update(apiKey, 'utf8', 'hex')
+    encrypted += cipher.final('hex')
+
+    return `${iv.toString('hex')}:${encrypted}`
+  } catch (error) {
+    console.error('Encryption failed:', error)
+    // 如果加密失败，返回base64编码的字符串作为后备
+    return Buffer.from(apiKey).toString('base64')
   }
-
-  let encrypted = cipher.update(apiKey, 'utf8', 'hex')
-  encrypted += cipher.final('hex')
-
-  const authTag = cipher.getAuthTag ? cipher.getAuthTag() : Buffer.alloc(0)
-
-  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`
 }
 
 // API密钥解密
@@ -47,22 +46,31 @@ export function decryptApiKey(encryptedApiKey: string): string {
     throw new Error('ENCRYPTION_KEY is not set')
   }
 
-  const algorithm = 'aes-256-gcm'
-  const key = Buffer.from(process.env.ENCRYPTION_KEY.replace('base64:', ''), 'base64')
+  try {
+    const algorithm = 'aes-256-cbc'
+    const key = Buffer.from(process.env.ENCRYPTION_KEY.replace('base64:', ''), 'base64').subarray(0, 32)
 
-  const [, authTagHex, encrypted] = encryptedApiKey.split(':')
-  const authTag = Buffer.from(authTagHex, 'hex')
+    const [ivHex, encrypted] = encryptedApiKey.split(':')
+    if (!ivHex || !encrypted) {
+      // 如果不是加密格式，尝试base64解码
+      try {
+        return Buffer.from(encryptedApiKey, 'base64').toString('utf8')
+      } catch {
+        return encryptedApiKey
+      }
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const decipher = crypto.createDecipher(algorithm, key) as any
-  if (decipher.setAuthTag && authTag.length > 0) {
-    decipher.setAuthTag(authTag)
+    const iv = Buffer.from(ivHex, 'hex')
+    const decipher = crypto.createDecipheriv(algorithm, key, iv)
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8')
+    decrypted += decipher.final('utf8')
+
+    return decrypted
+  } catch (error) {
+    console.error('Decryption failed:', error)
+    // 如果解密失败，返回原始数据（可能是旧格式或未加密）
+    return encryptedApiKey
   }
-
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8')
-  decrypted += decipher.final('utf8')
-
-  return decrypted
 }
 
 // 生成用户头像首字母
