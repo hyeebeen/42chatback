@@ -2,6 +2,7 @@
 import { db, apiConfigurations, promptTemplates } from '@/lib/db'
 import { encryptApiKey, decryptApiKey } from '@/lib/utils'
 import { eq } from 'drizzle-orm'
+import { ensureMigrations } from './migrate'
 
 // 定义设置类型
 interface UserSettings {
@@ -39,6 +40,9 @@ export const databaseSettingsStorage = {
   // 保存用户设置到数据库
   saveUserSettings: async (userId: string, settings: UserSettings): Promise<boolean> => {
     try {
+      // 确保数据库迁移已完成
+      await ensureMigrations()
+
       console.log('保存设置到数据库:', userId)
 
       // 开始事务处理
@@ -85,6 +89,9 @@ export const databaseSettingsStorage = {
   // 从数据库获取用户设置
   getUserSettings: async (userId: string): Promise<UserSettings | null> => {
     try {
+      // 确保数据库迁移已完成
+      await ensureMigrations()
+
       console.log('从数据库加载设置:', userId)
 
       // 获取用户的API配置
